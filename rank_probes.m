@@ -1,5 +1,5 @@
 function [ranked_list, scores, parameters, varargout] = ...
-	rank_probes(probe_list, pO2_min, pO2_max, ranking_mode, varargin)
+	rank_probes(probe_list, pO2_min, pO2_max, sigma_N, ranking_mode, varargin)
 %
 % TODO: function description
 %
@@ -7,9 +7,9 @@ function [ranked_list, scores, parameters, varargout] = ...
 	%% Argument checking and processing
 
 	% Check the number of input arguments
-	if ~((nargin == 4) || (nargin == 5))
+	if ~((nargin == 5) || (nargin == 6))
 		error('rank_probes:invalid_argument', ...
-			'Number of input arguments must be four or five');
+			'Number of input arguments must be five or six');
 	end
 
 	% Check probe_list
@@ -34,6 +34,12 @@ function [ranked_list, scores, parameters, varargout] = ...
 	if ~isscalar(pO2_max) || ~isfloat(pO2_max)
 		error('rank_probes:invalid_argument', ...
 			'pO2_max must be a scalar float');
+	end
+
+	% Check sigma_N
+	if ~isscalar(sigma_N) || ~isfloat(sigma_N)
+		error('rank_probes:invalid_argument', ...
+			'sigma_N must be a scalar float');
 	end
 
 	% Check ranking_mode
@@ -64,6 +70,9 @@ function [ranked_list, scores, parameters, varargout] = ...
 			'Number of output arguments must be three or four');
 	end
 
+	% Samples per scan--shouldn't affect our rankings as long as it's large
+	M = 128;
+
 	%% Multiply these by the max HWHM linewidth to determine our parameters
 	if strcmp(ranking_mode, 'worst')
 		 B_m_factor = 4;
@@ -79,17 +88,17 @@ function [ranked_list, scores, parameters, varargout] = ...
 
 	%% Determine the parameters to use for each probe, and assign its score
 	for i=1:length(probe_list)
-		
+
 		% Minimum and maximum linewidths, peak-to-peak
 		Gamma_pp_min = probe_list{i}.Gamma_0_pp + ...
 			probe_list{i}.sensitivity*pO2_min;
 		Gamma_pp_max = probe_list{i}.Gamma_0_pp + ...
 			probe_list{i}.sensitivity*pO2_max;
-		
+
 		% Minimum and maximum linewidths, half-width at half-maximum
 		Gamma_hwhm_min = sqrt(3)/2 * Gamma_pp_min;
 		Gamma_hwhm_max = sqrt(3)/2 * Gamma_pp_max;
-		
+
 		% Optimized parameters
 		parameters{i} = ...
 			[Gamma_hwhm_max * B_m_factor;      % modulation amplitude, in Gauss
@@ -102,45 +111,81 @@ function [ranked_list, scores, parameters, varargout] = ...
 				1,               ... number of scans
 				probe_list{i}.d, ... spin density
 				Gamma_hwhm_max,  ... HWHM linewidth
-				1,               ... noise standard deviation TODO
-				128              ... samples per scan (shouldn't affect results)
+				sigma_N,         ... noise standard deviation
+				M                ... samples per scan
 			));
 		else % ranking_mode is 'average'
 			scores(i) = crlb_on_mean_std( ...
 				parameters{i},   ... acquisition parameters
 				1,               ... number of scans
 				probe_list{i}.d, ... spin density
-				1,               ... noise standard deviation TODO
-				128,             ... samples per scan (shouldn't affect results)
+				sigma_N,         ... noise standard deviation
+				M,               ... samples per scan
 				Gamma_hwhm_min,  ... minimum HWHM linewidth
 				Gamma_hwhm_max,  ... maximum HWHM linewidth
 				64               ... how many different linewidths to check
 			);
 		end
+
+		% Convert from Gamma_hwhm std. to pO2 std.
+		scores(i) = scores(i) * 2/sqrt(3) / probe_list{i}.sensitivity;
 	end
 
-	%% Normalize the scores: lower is better; the best score is 1
-	scores = scores / min(scores);
-	
 	%% Sort from best to worst
 	[scores, indices] = sort(scores);
 	parameters = parameters(indices);
 	ranked_list = probe_list(indices);
 
 	%% Optionally make a figure
-	% This uses some ugly hacks to get multiple bar colors. Jesus, matlab.
 	if make_figure
 		varargout{1} = figure(); % new figure window
+
+		% Top plot: scores for each probe
+		% This uses an ugly hack to get multiple bar colors :/
+		subplot(2, 1, 1);
 		hold('on');
 		bar_colors = {'r' 'y' 'g' 'c' 'b' 'm'};
+		xtick_labels = {''};
 		for i=1:length(scores)
 			single_bar = zeros(size(scores));
 			single_bar(i) = scores(i);
-			bar(single_bar, bar_colors{mod(i,length(bar_colors))});
+			bar(single_bar, 0.5, bar_colors{mod(i, length(bar_colors))});
+			xtick_labels{end+1} = ranked_list{i}.name; %#ok
+			xtick_labels{end+1} = ''; %#ok
+		end
+		set(gca(), 'Xticklabel', xtick_labels);
+		if strcmp(ranking_mode, 'worst')
+			ylabel('Worst pO_2 std. (mmHg)');
+			title('Worst-case standard deviation--lower is better');
+		else % ranking_mode is 'average'
+			ylabel('Average pO_2 std. (mmHg)');
+			title('Average standard deviation--lower is better');
 		end
 
+		% Bottom plot: performance across the range for the winning probe
+		subplot(2, 1, 2);
+		pO2 = linspace(pO2_min, pO2_max, 100);
+		Gamma_hwhm = sqrt(3)/2 * ...
+			(ranked_list{1}.Gamma_0_pp + ranked_list{1}.sensitivity * pO2);
+		predicted_std = zeros(size(Gamma_hwhm));
+		for i=1:length(Gamma_hwhm)
+			predicted_std(i) = sqrt(crlb_on_var( ...
+				parameters{1},    ... acquisition parameters
+				1,                ... number of scans
+				ranked_list{1}.d, ... spin density
+				Gamma_hwhm(i),    ... HWHM linewidth
+				sigma_N,          ... noise standard deviation
+				M                 ... samples per scan
+			));
+		end
+		% Convert from Gamma_hwhm std. to pO2 std.
+		predicted_std = predicted_std * 2/sqrt(3) / ranked_list{1}.sensitivity;
+		plot(pO2, predicted_std, bar_colors{1});
+		xlabel('pO_2 (mmHg)');
+		ylabel('pO_2 std. (mmHg)');
+		title(['Performance profile for ' ranked_list{1}.name]);
 	else
-		varargout{1} = 0;
+		% In case the user didn't ask for a figure but still requested a handle
+		varargout{1} = -1; % not a valid handle
 	end
-	
 end

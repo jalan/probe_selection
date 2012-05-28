@@ -49,9 +49,9 @@ function [bound] = crlb_on_var(X, number_of_scans, d, Gamma, sigma_N, M)
 	elseif ~isscalar(sigma_N) || ~isfloat(sigma_N) || ~(sigma_N>0)
 		error('crlb_on_var:invalid_argument', ...
 			'sigma_N must be a positive scalar float');
-	elseif ~isscalar(M) || ~isnumeric(M) || ~(M>0)
+	elseif ~isscalar(M) || ~isfloat(M) || ~(M>0)
 		error('crlb_on_var:invalid_argument', ...
-			'M must be a positive scalar numeric');
+			'M must be a positive scalar float');
 	end
 
     % The unknowns are d, Gamma, and one B_m for each scan

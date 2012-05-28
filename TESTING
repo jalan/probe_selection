@@ -1,0 +1,8 @@
+This code is known to run on the following Matlab versions:
+
+    2010b
+    2011b
+
+If you know of a version that works and isn't listed here, or of a version that
+doesn't work, please let me know. You can report these and any other issues at
+https://github.com/jalan/probe_selection/issues

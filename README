@@ -1,10 +1,36 @@
-This code can help you decide which probe to use for certain EPR oximetry
-experiments
+This code can help you decide which probe to use for certain EPR (electron
+paramagnetic resonance) oximetry experiments
 
 - Instructions -----------------------------------------------------------------
 
-TODO
+The easiest way to use this code is probably to simply copy the example.m file
+and modify it for your needs
 
 - Notes ------------------------------------------------------------------------
 
-None yet :)
+This code is based on our EPR experiment design papers, [1] and [2]; the same
+assumptions that we rely on there apply here.
+
+rank_probes assumes we are doing a single-scan acquisition, since this is the
+current common practice.
+
+TODO: note about scores and/or vertical axes on the optional plots
+
+- See also ---------------------------------------------------------------------
+
+https://github.com/jalan/dual-scan_acquisition, where the code and data needed
+to produce the figures in [2] are available
+
+- References -------------------------------------------------------------------
+
+[1] "Optimization of magnetic field sweep and field modulation amplitude for
+    continuous-wave EPR oximetry". Jason Palmer, Lee C. Potter, Rizwan Ahmad.
+    Journal of Magnetic Resonance, 2011.
+    DOI: http://dx.doi.org/10.1016/j.jmr.2011.01.013
+    PubMed: http://www.ncbi.nlm.nih.gov/pubmed/21334232
+    PudMed Central: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3086786
+
+[2] "Dual-scan acquisition for accelerated continuous-wave EPR oximetry". Jason
+    Palmer, Lee C. Potter, David H. Johnson, Jay L. Zweier, Rizwan Ahmad.
+    Submitted to the Journal of Magnetic Resonance in 2012.
+

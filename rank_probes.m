@@ -1,5 +1,5 @@
-function [ranked_list, scores, parameters, varargout] = ...
-	rank_probes(probe_list, pO2_min, pO2_max, sigma_N, ranking_mode, varargin)
+function [ranked_list, scores, parameters, varargout] = rank_probes( ...
+	probe_list, pO2_min, pO2_max, sigma_N, M, ranking_mode, varargin)
 %
 % TODO: function description
 %
@@ -7,9 +7,9 @@ function [ranked_list, scores, parameters, varargout] = ...
 	%% Argument checking and processing
 
 	% Check the number of input arguments
-	if ~((nargin == 5) || (nargin == 6))
+	if ~((nargin == 6) || (nargin == 7))
 		error('rank_probes:invalid_argument', ...
-			'Number of input arguments must be five or six');
+			'Number of input arguments must be six or seven');
 	end
 
 	% Check probe_list
@@ -42,6 +42,12 @@ function [ranked_list, scores, parameters, varargout] = ...
 			'sigma_N must be a scalar float');
 	end
 
+	% Check M
+	if ~isscalar(M) || ~isfloat(M)
+		error('rank_probes:invalid_argument', ...
+			'M must be a scalar float');
+	end
+
 	% Check ranking_mode
 	if ~ischar(ranking_mode) || ...
 			~(strcmp(ranking_mode, 'worst') || strcmp(ranking_mode, 'average'))
@@ -69,9 +75,6 @@ function [ranked_list, scores, parameters, varargout] = ...
 		error('rank_probes:invalid_argument', ...
 			'Number of output arguments must be three or four');
 	end
-
-	% Samples per scan--shouldn't affect our rankings as long as it's large
-	M = 128;
 
 	%% Multiply these by the max HWHM linewidth to determine our parameters
 	if strcmp(ranking_mode, 'worst')

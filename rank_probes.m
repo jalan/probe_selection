@@ -56,7 +56,7 @@ function [ranked_list, scores, parameters, varargout] = rank_probes( ...
 	end
 
 	% Check make_figure, which is an optional input argument
-	if (nargin == 4)
+	if (nargin == 6)
 		make_figure = false();
 	elseif ~ischar(varargin{1})
 		error('rank_probes:invalid_argument', ...

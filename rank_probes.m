@@ -1,7 +1,56 @@
 function [ranked_list, scores, parameters, varargout] = rank_probes( ...
 	probe_list, pO2_min, pO2_max, sigma_N, M, ranking_mode, varargin)
 %
-% TODO: function description
+% [ranked_list, scores, parameters] = rank_probes( ...
+%     probe_list, pO2_min, pO2_max, sigma_N, M, ranking_mode)
+%
+%                    or to include a figure
+%
+% [ranked_list, scores, parameters, handle] = rank_probes( ...
+%     probe_list, pO2_min, pO2_max, sigma_N, M, ranking_mode, make_figure)
+%
+% This function takes a list of probes and a description of an EPR oximetry
+% experiment and predicts how well each probe will perform.
+%
+% The inputs are probe_list, pO2_min, pO2_max, sigma_N, M, ranking_mode, and
+% make_figure:
+%
+%     probe_list   : cell array of Probe objects to evaluate
+%     pO2_min      : lowest oxygen pressure (pO2) expected, in mmHg
+%     pO2_max      : highest oxygen pressure expected, in mmHg
+%     sigma_N      : noise standard deviation at each sample
+%     M            : how many samples in the scan
+%     ranking_mode : 'average' or 'worst', how to score each probe
+%     make_figure  : optional, 'yes' or 'no', to create an explanatory figure
+%
+%     ranking_mode='average' implies that the scoring metric is the standard
+%     deviation of pO2, averaged across the pO2 range in question.
+%     ranking_mode='worst' implies that the scoring metric is the standard
+%     deviation of pO2 at the highest pO2 value (i.e., where the standard
+%     deviation is highest).
+%
+% The outputs are ranked_list, scores, parameters, and handle:
+%
+%     ranked_list : a cell array of Probe objects, ordered from best to worst
+%     scores      : corresponding scores for each probe, using the metric
+%                   specified in ranking_mode. Lower scores are better
+%     parameters  : corresponding optimized acquisition parameters for each
+%                   probe. Each entry in this cell array is [B_m; Delta_B],
+%                   where B_m is the modulation amplitude and Delta_B is the
+%                   sweep width, each in Gauss
+%     handle      : a handle to the optional explanatory figure
+%
+% The scores returned, and the values on the vertical axes of the optional
+% plots, are arbitrary in some sense: they depend on the values of sigma_N and M
+% that you supply.
+%  - If you DO know these values, perhaps from performing previous experiments,
+%    great: the scores and plots will be realistic.
+%  - If you DON'T know these values, that's fine too: just provide some default
+%    values like sigma_N=1e18 and M=512; then the scores and the plots may not
+%    be realistic, but the probes will still be ranked correctly.
+%
+% Dependencies for this function are crlb_on_var, crlb_on_mean_std, df_dd,
+% df_dGamma, df_dB_m, and Probe
 %
 
 	%% Argument checking and processing
@@ -25,27 +74,33 @@ function [ranked_list, scores, parameters, varargout] = rank_probes( ...
 	end
 
 	% Check pO2_min
-	if ~isscalar(pO2_min) || ~isfloat(pO2_min)
+	if ~isscalar(pO2_min) || ~isfloat(pO2_min) || (pO2_min<0)
 		error('rank_probes:invalid_argument', ...
-			'pO2_min must be a scalar float');
+			'pO2_min must be a non-negative scalar float');
 	end
 
 	% Check pO2_max
-	if ~isscalar(pO2_max) || ~isfloat(pO2_max)
+	if ~isscalar(pO2_max) || ~isfloat(pO2_max) || (pO2_max<0)
 		error('rank_probes:invalid_argument', ...
-			'pO2_max must be a scalar float');
+			'pO2_max must be a non-negative scalar float');
+	end
+
+	% These must be in the right order
+	if (pO2_min > pO2_max)
+		error('rank_probes:invalid_argument', ...
+			'pO2_min must not be greater than pO2_max');
 	end
 
 	% Check sigma_N
-	if ~isscalar(sigma_N) || ~isfloat(sigma_N)
+	if ~isscalar(sigma_N) || ~isfloat(sigma_N) || ~(sigma_N>0)
 		error('rank_probes:invalid_argument', ...
-			'sigma_N must be a scalar float');
+			'sigma_N must be a positive scalar float');
 	end
 
 	% Check M
-	if ~isscalar(M) || ~isfloat(M)
+	if ~isscalar(M) || ~isfloat(M) || ~(M>0)
 		error('rank_probes:invalid_argument', ...
-			'M must be a scalar float');
+			'M must be a positive scalar float');
 	end
 
 	% Check ranking_mode

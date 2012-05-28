@@ -4,7 +4,7 @@ paramagnetic resonance) oximetry experiments
 - Instructions -----------------------------------------------------------------
 
 The easiest way to use this code is probably to simply copy the example.m file
-and modify it for your needs
+and modify it for your needs. It is heavily commented.
 
 - Notes ------------------------------------------------------------------------
 
@@ -14,7 +14,16 @@ assumptions that we rely on there apply here.
 rank_probes assumes we are doing a single-scan acquisition, since this is the
 current common practice.
 
-TODO: note about scores and/or vertical axes on the optional plots
+The scores returned by rank_probes, and the values on the vertical axes of the
+optional plots, are arbitrary in some sense: they depend on the values of
+sigma_N and M that you supply.
+ - If you DO know these values, great: the scores and plots will be realistic.
+ - If you DON'T know these values, that's fine too: just provide some default
+   values like sigma_N=1e18 and M=512; then the scores and the plots may not
+   be realistic, but the probes will still be ranked correctly.
+
+Please report any issues at https://github.com/jalan/probe_selection/issues, or
+contact me directly if you prefer.
 
 - See also ---------------------------------------------------------------------
 
@@ -24,13 +33,13 @@ to produce the figures in [2] are available
 - References -------------------------------------------------------------------
 
 [1] "Optimization of magnetic field sweep and field modulation amplitude for
-    continuous-wave EPR oximetry". Jason Palmer, Lee C. Potter, Rizwan Ahmad.
+    continuous-wave EPR oximetry". Jason Palmer, Lee C Potter, Rizwan Ahmad.
     Journal of Magnetic Resonance, 2011.
     DOI: http://dx.doi.org/10.1016/j.jmr.2011.01.013
     PubMed: http://www.ncbi.nlm.nih.gov/pubmed/21334232
     PudMed Central: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3086786
 
 [2] "Dual-scan acquisition for accelerated continuous-wave EPR oximetry". Jason
-    Palmer, Lee C. Potter, David H. Johnson, Jay L. Zweier, Rizwan Ahmad.
-    Submitted to the Journal of Magnetic Resonance in 2012.
+    Palmer, Lee C Potter, David H Johnson, Jay L Zweier, Rizwan Ahmad. Submitted
+    to the Journal of Magnetic Resonance in 2012.
 

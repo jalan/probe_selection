@@ -54,7 +54,7 @@ function [bound] = crlb_on_var(X, number_of_scans, d, Gamma, sigma_N, M)
 			'M must be a positive scalar float');
 	end
 
-    % The unknowns are d, Gamma, and one B_m for each scan
+	% The unknowns are d, Gamma, and one B_m for each scan
 	J_total = zeros(2 + number_of_scans); % total information from all scans
 
 	% Time is fixed; information is additive. e.g., if you use two windows, the
@@ -95,7 +95,7 @@ function [bound] = crlb_on_var(X, number_of_scans, d, Gamma, sigma_N, M)
 		% We have three remaining elements to fill in by symmetry
 		J_current(2,   1) = J_current(1, 2);
 		J_current(2+i, 1) = J_current(1, 2+i);
-        J_current(2+i, 2) = J_current(2, 2+i);
+		J_current(2+i, 2) = J_current(2, 2+i);
 
 		% Don't forget the noise power and the multiscan factor
 		J_current = J_current / sigma_N^2 * multiscan_factor;

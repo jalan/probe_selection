@@ -43,7 +43,7 @@ function [bound] = crlb_on_mean_std(X, number_of_scans, d, sigma_N, M, ...
 
 	% Preallocate
 	std = zeros(size(Gamma));
-	
+
 	% Compute the bound at each point Gamma
 	for i=1:length(Gamma)
 		std(i) = sqrt(crlb_on_var(X, number_of_scans, d, Gamma(i), sigma_N, M));

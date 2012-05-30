@@ -1,6 +1,9 @@
 This code can help you decide which probe to use for certain EPR (electron
 paramagnetic resonance) oximetry experiments
 
+The latest version of this code can be found at
+https://github.com/jalan/probe_selection
+
 - Instructions -----------------------------------------------------------------
 
 The easiest way to use this code is probably to simply copy the example.m file

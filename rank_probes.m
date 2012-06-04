@@ -165,23 +165,23 @@ function [ranked_list, scores, parameters, varargout] = rank_probes( ...
 		% Compute score
 		if strcmp(ranking_mode, 'worst')
 			scores(i) = sqrt(crlb_on_var( ...
-				parameters{i},   ... acquisition parameters
-				1,               ... number of scans
-				probe_list{i}.d, ... spin density
-				Gamma_hwhm_max,  ... HWHM linewidth
-				sigma_N,         ... noise standard deviation
-				M                ... samples per scan
+				parameters{i},   ... % acquisition parameters
+				1,               ... % number of scans
+				probe_list{i}.d, ... % spin density
+				Gamma_hwhm_max,  ... % HWHM linewidth
+				sigma_N,         ... % noise standard deviation
+				M                ... % samples per scan
 			));
 		else % ranking_mode is 'average'
 			scores(i) = crlb_on_mean_std( ...
-				parameters{i},   ... acquisition parameters
-				1,               ... number of scans
-				probe_list{i}.d, ... spin density
-				sigma_N,         ... noise standard deviation
-				M,               ... samples per scan
-				Gamma_hwhm_min,  ... minimum HWHM linewidth
-				Gamma_hwhm_max,  ... maximum HWHM linewidth
-				64               ... how many different linewidths to check
+				parameters{i},   ... % acquisition parameters
+				1,               ... % number of scans
+				probe_list{i}.d, ... % spin density
+				sigma_N,         ... % noise standard deviation
+				M,               ... % samples per scan
+				Gamma_hwhm_min,  ... % minimum HWHM linewidth
+				Gamma_hwhm_max,  ... % maximum HWHM linewidth
+				64               ... % how many different linewidths to check
 			);
 		end
 
@@ -228,12 +228,12 @@ function [ranked_list, scores, parameters, varargout] = rank_probes( ...
 		predicted_std = zeros(size(Gamma_hwhm));
 		for i=1:length(Gamma_hwhm)
 			predicted_std(i) = sqrt(crlb_on_var( ...
-				parameters{1},    ... acquisition parameters
-				1,                ... number of scans
-				ranked_list{1}.d, ... spin density
-				Gamma_hwhm(i),    ... HWHM linewidth
-				sigma_N,          ... noise standard deviation
-				M                 ... samples per scan
+				parameters{1},    ... % acquisition parameters
+				1,                ... % number of scans
+				ranked_list{1}.d, ... % spin density
+				Gamma_hwhm(i),    ... % HWHM linewidth
+				sigma_N,          ... % noise standard deviation
+				M                 ... % samples per scan
 			));
 		end
 		% Convert from Gamma_hwhm std. to pO2 std.

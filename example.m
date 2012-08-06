@@ -76,7 +76,7 @@ M = 512;        % how many samples in our scan
 		M,          ... % how many samples in the scan
 		'average',  ... % how to score each probe
 		'yes'       ... % yes, produce a figure
-	);
+	); %#ok: it's example code, so don't show a warning about unused variables
 
 %% Evaluate our probes using the 'worst' ranking mode, and make a figure
 [ranked_list, scores, parameters, handle] = ...

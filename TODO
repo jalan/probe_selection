@@ -1,2 +1,2 @@
-Make the code compatible with octave. Currently, octave doesn't support defining classes
-via classdef; until it does, this item is on hold.
+Make the code compatible with octave. Currently, octave doesn't support defining
+classes via classdef; until it does, this item is on hold.

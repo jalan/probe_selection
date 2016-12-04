@@ -15,7 +15,8 @@ Resonance, 2011.
 
 ## Instructions
 
-Simply copy `example.m` and modify it for your needs.
+Simply copy `example.m` and modify it for your needs. It works in both MATLAB
+and Octave.
 
 
 ## Results
